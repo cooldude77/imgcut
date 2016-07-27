@@ -1,0 +1,61 @@
+body {
+    margin: 0;
+}
+
+label {
+    display: block;
+    margin-top: 10px;
+}
+
+input {
+    display: block;
+}
+
+.cl-imgcut-drag-and-drop-div {
+
+    width: 500px;
+    height: 500px;
+    position: relative;
+    overflow: scroll;
+
+}
+
+.cl-imgcut-crop-overlay-parent {
+
+    width: 500px;
+    height: 500px;
+    background: rgba(112, 81, 246, 0.0);
+    position: absolute;
+    left: 0;
+    top: 0;
+
+}
+
+.cl-imgcut-crop-overlay {
+
+    height: 200px;
+    width: 200px;
+    opacity: .5;
+    background: rgba(112, 81, 246, 0.6);
+
+}
+
+#id-imgcut-max-size-constraint {
+
+}
+
+.ui-resizable {
+    position: absolute
+}
+
+/** toolbar **/
+
+.cl-imgcut-toolbar {
+    width: 300px;
+    background: red;
+
+}
+
+.cl-imgcut-toolbar-buttons {
+    margin: 10px 0;
+}

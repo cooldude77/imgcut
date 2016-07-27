@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Test Image Cut</title>
+    <link rel="stylesheet" href="../imgcut/jquery/jquery-ui.css">
+    <script src="../imgcut/jquery/external/jquery/jquery.js"></script>
+    <script src="../imgcut/jquery/jquery-ui.js"></script>
+    <link rel="stylesheet" href="../imgcut/imgcut.css">
+    <script src="../imgcut/imgcut.js"></script>
+</head>
+<body>
+
+<form>
+    <input type="text" name="sample"/>
+    <input type="file" name="myfile" id="myfile"/>
+    <input type="submit">
+</form>
+<script>
+    $(document).ready(function(){
+        $("#myfile").imgcut();
+
+    });
+</script>
+</body>
+</html>
