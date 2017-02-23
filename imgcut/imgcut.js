@@ -12,7 +12,8 @@ $.widget("custom.imgcut", {
         maxHeight: 400,
         maxWidth: 400,
         // ajax options
-        urlToCrop: "http://localhost/dev/imagecropphp/imagecrop.php",
+        urlToCrop: "http://localhost/dev/imgcut/php/crop.php",
+        urlToSave: "http://localhost/dev/imgcut/php/save.php",
         // Resizer options
         handles: "se",
         aspectRatio: true,
@@ -24,6 +25,7 @@ $.widget("custom.imgcut", {
     _create: function () {
 
         _this = this;
+
         this.doScroll = true;
         this.zoomFactor = 1;
         this.maxZoomFactor = 5;
@@ -34,24 +36,8 @@ $.widget("custom.imgcut", {
 
         // create toolbar
         this.toolbar = $(toolBarHtml);
-        // attach events
-        this.toolbar.find(".cl-imgcut-toolbar-button-crop").on("click", function () {
-            _this._cropButtonPressed();
-        });
-        this.toolbar.find(".cl-imgcut-toolbar-button-undo").on("click", function () {
-            _this._undoButtonPressed();
-        });
-        this.toolbar.find(".cl-imgcut-toolbar-button-zoom-plus").on("click", function () {
-            _this._zoomPlusButtonPressed();
-        });
-        this.toolbar.find(".cl-imgcut-toolbar-button-zoom-minus").on("click", function () {
-            _this._zoomMinusButtonPressed();
-        });
-        this.toolbar.find(".cl-imgcut-toolbar-button-save").on("click", function () {
-            _this._saveButtonPressed();
-        });
 
-        this.toolbar.appendTo(this.wrap);
+        this._initializeToolbar();
 
         // add drag and drop div
         this.dragAndDropDiv = $(dragAndDropDiv);
@@ -59,6 +45,7 @@ $.widget("custom.imgcut", {
             if (_this.doScroll == true)
                 _this._updateCropBoxParentPosition();
         });
+        this.image = this.dragAndDropDiv.find('img');
 
         this.dragAndDropDiv.appendTo(this.wrap);
         this.overlayParent = $("<div/>").addClass("cl-imgcut-crop-overlay-parent");
@@ -83,7 +70,7 @@ $.widget("custom.imgcut", {
 
         var overlayWidth = this.overlay.width();
         var overlayHeight = this.overlay.height();
-        console.log("OverlayParent top")
+        console.log("OverlayParent top");
         // set it draggable
         this.overlay.draggable(
             {
@@ -100,36 +87,65 @@ $.widget("custom.imgcut", {
             }
         );
 
+        this.toolbar.appendTo(this.wrap);
 
         this.element.change(function () {
-            var value = $(this).val();
-            var reader = new FileReader();
-            var fileUploaded = this.files;
 
-            if (fileUploaded.type == "image/png")
-                _this.dataUri = "data:image/png;base64,";
-            else if (fileUploaded.type = "image/jpeg")
-                _this.dataUri = "data:image/jpg;base64,";
-            reader.readAsDataURL(fileUploaded[0]);
-
-            reader.onload = function (e) {
-                var src = e.target.result;
-                _this.image = _this.dragAndDropDiv.find("img");
-                _this.image.attr('src', src);
-                _this.toolbar.find(".cl-imgcut-toolbar-input-file-in-string").val(src);
-
-                _this.toolbar.find(".cl-imgcut-toolbar-source-input-height").val(_this.image.height());
-                _this.toolbar.find(".cl-imgcut-toolbar-source-input-width").val(_this.image.width());
-
-                _this.toolbar.find(".cl-imgcut-toolbar-source-input-zoomed-height").val(_this.image.height());
-                _this.toolbar.find(".cl-imgcut-toolbar-source-input-zoomed-width").val(_this.image.width());
-
-            }
-
+            _this._uploadToServer();
 
         });
 
         this._updateCoordinates();
+
+        this._attachAjaxForm();
+
+    },
+    _initializeToolbar: function(){
+
+        // attach events
+        this.toolbar.find(".cl-imgcut-toolbar-button-crop").on("click", function () {
+            _this._cropButtonPressed();
+        });
+        this.toolbar.find(".cl-imgcut-toolbar-button-undo").on("click", function () {
+            _this._undoButtonPressed();
+        });
+        this.toolbar.find(".cl-imgcut-toolbar-button-zoom-plus").on("click", function () {
+            _this._zoomPlusButtonPressed();
+        });
+        this.toolbar.find(".cl-imgcut-toolbar-button-zoom-minus").on("click", function () {
+            _this._zoomMinusButtonPressed();
+        });
+        this.toolbar.find(".cl-imgcut-toolbar-button-save").on("click", function () {
+            _this._saveButtonPressed();
+        });
+    },
+    _attachAjaxForm: function () {
+
+        this.ajaxUploadForm = $(ajaxUploadForm);
+        this.ajaxUploadForm.appendTo(this.wrap);
+
+    },
+    _uploadToServer: function () {
+
+        _this = this;
+        // get the parent
+        this.parent = this.element.parent();
+
+        this.element.appendTo(this.ajaxUploadForm);
+
+
+        $.ajax({
+            url: this.options.urlToSave,
+            data: new FormData(this.ajaxUploadForm[0]),
+            context: document.body,
+            cache: false,
+            contentType: false,
+            processData: false,
+            type: 'POST'
+        }).always(function (data) {
+            _this.parent.append(_this.element);
+            _this.image.attr('src', data);
+        });
 
     },
     _cropButtonPressed: function () {
@@ -160,9 +176,7 @@ $.widget("custom.imgcut", {
 
         var form = $("#id-form");
 
-        $.post(this.options.urlToCrop, form.serialize(), function (response) {
-            alert(response);
-        });
+
     },
     _undo: function () {
 
@@ -287,3 +301,4 @@ var toolBarHtml = "<div class='cl-imgcut-toolbar'>" +
     "</div>" +
     "</div>";
 var dragAndDropDiv = "<div class='cl-imgcut-drag-and-drop-div'><img src=''/></div>"
+var ajaxUploadForm = "<form class='cl-imgcut-ajax-upload-form'></form>";
