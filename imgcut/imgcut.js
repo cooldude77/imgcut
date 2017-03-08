@@ -28,12 +28,11 @@ $.widget("custom.imgcut", {
 
         this._initializeOptions();
 
-        this._createWorkspace();
+        this._initializeWorkspace();
+
+        this._initializeImageDropDiv();
+
         /*
-         this.element.before(this.wrap);
-
-         this._initializeDragAndDropDiv();
-
          this._initializeToolbar();
 
          this._updateCoordinates();
@@ -49,62 +48,95 @@ $.widget("custom.imgcut", {
 
     },
     _initializeWorkspace: function () {
-        // first wrap image
+
+        // get wrapper
         this.wrap = $(imgCutWrapper);
+        // wrap the field
         this.element.wrap(this.wrap);
-        this.wrap.append(imgSrcTag);
+        // add dragAnddrop div after control
+        this.imageDropDiv = $(imageDropDiv);
+        this.element.after(this.imageDropDiv);
+        //this.element.hide();
 
 
     },
-    _initializeDragAndDropDiv: function () {
-        // add drag and drop div
-        this.dragAndDropDiv = $(dragAndDropDiv);
-        this.dragAndDropDiv.scroll(function () {
-            if (_this.doScroll == true)
-                _this._updateCropBoxParentPosition();
-        });
-        this.image = this.dragAndDropDiv.find('img');
+    _initializeImageDropDiv: function () {
 
-        this.dragAndDropDiv.appendTo(this.wrap);
-        this.overlayParent = $("<div/>").addClass("cl-imgcut-crop-overlay-parent");
-        this.overlayParent.appendTo(this.dragAndDropDiv);
-
-        // add the overlay
-        this.overlay = $("<div/>").addClass("cl-imgcut-crop-overlay");
-        // attach overlay
-        this.overlay.appendTo(this.overlayParent);
-        // make overlay resizeable
-        this.overlay.resizable({
-            resize: function (event, ui) {
-                _this._updateCoordinates();
+        _this = this;
+        $(this.imageDropDiv).on({
+            dragover: function (event) {
+                event.stopPropagation();
+                event.preventDefault();
             },
-            handles: this.options.handles,
-            aspectRatio: this.options.aspectRatio,
-            maxHeight: this.options.maxResizeHeight,
-            maxWidth: this.options.maxResizeWidth,
-            minHeight: this.options.minResizeHeight,
-            mubWidth: this.options.minResizeWidth
+            drop: function (event) {
+
+                event.stopPropagation();
+                event.preventDefault();
+
+
+                var file = event.originalEvent.dataTransfer.files[0];
+                if (file != undefined) {
+                    var reader = new FileReader();
+                    reader.onload = function (event) {
+
+                        var img = $("<img>").attr("src", event.target.result);
+
+                        $(_this.imageDropDiv).append(img);
+                    };
+
+                    reader.readAsDataURL(file);
+                }
+
+            }
         });
 
-        var overlayWidth = this.overlay.width();
-        var overlayHeight = this.overlay.height();
-        console.log("OverlayParent top");
-        // set it draggable
-        this.overlay.draggable(
-            {
-                drag: function (event, ui) {
-                    _this.doScroll = false;
-                    _this._updateCoordinates();
+        /*
+         this.imageDropDiv.scroll(function () {
+         if (_this.doScroll == true)
+         _this._updateCropBoxParentPosition();
+         });
+         this.image = this.imageDropDiv.find('img');
 
-                },
-                stop: function (event, ui) {
+         this.imageDropDiv.appendTo(this.wrap);
+         this.overlayParent = $("<div/>").addClass("cl-imgcut-crop-overlay-parent");
+         this.overlayParent.appendTo(this.imageDropDiv);
 
-                    _this.doScroll = true;
-                },
-                containment: [0, 0, 400 - overlayWidth, 400 - overlayHeight]
-            }
-        );
+         // add the overlay
+         this.overlay = $("<div/>").addClass("cl-imgcut-crop-overlay");
+         // attach overlay
+         this.overlay.appendTo(this.overlayParent);
+         // make overlay resizeable
+         this.overlay.resizable({
+         resize: function (event, ui) {
+         _this._updateCoordinates();
+         },
+         handles: this.options.handles,
+         aspectRatio: this.options.aspectRatio,
+         maxHeight: this.options.maxResizeHeight,
+         maxWidth: this.options.maxResizeWidth,
+         minHeight: this.options.minResizeHeight,
+         mubWidth: this.options.minResizeWidth
+         });
 
+         var overlayWidth = this.overlay.width();
+         var overlayHeight = this.overlay.height();
+         console.log("OverlayParent top");
+         // set it draggable
+         this.overlay.draggable(
+         {
+         drag: function (event, ui) {
+         _this.doScroll = false;
+         _this._updateCoordinates();
+
+         },
+         stop: function (event, ui) {
+
+         _this.doScroll = true;
+         },
+         containment: [0, 0, 400 - overlayWidth, 400 - overlayHeight]
+         }
+         );
+         */
     },
     _initializeOptions: function () {
         this.doScroll = true;
@@ -202,11 +234,11 @@ $.widget("custom.imgcut", {
 
     },
     _updateCropBoxParentPosition: function () {
-        var scrollTop = this.dragAndDropDiv.scrollTop();
-        var scrollLeft = this.dragAndDropDiv.scrollLeft();
+        var scrollTop = this.imageDropDiv.scrollTop();
+        var scrollLeft = this.imageDropDiv.scrollLeft();
 
-        var dragAndDropDivTop = this.dragAndDropDiv.offset().top;
-        var dragAndDropDivLeft = this.dragAndDropDiv.offset().left;
+        var dragAndDropDivTop = this.imageDropDiv.offset().top;
+        var dragAndDropDivLeft = this.imageDropDiv.offset().left;
 
 
         console.log("scrollTop=" + scrollTop);
@@ -317,7 +349,7 @@ var toolBarHtml = "<div class='cl-imgcut-toolbar'>" +
     "<button name='button_save' class='cl-imgcut-toolbar-button-save' >Save</button>" +
     "</div>" +
     "</div>";
-var dragAndDropDiv = "<div class='cl-imgcut-drag-and-drop-div'><img src=''/></div>"
+var imageDropDiv = "<div class='cl-imgcut-drag-and-drop-div'></div>"
 var imgCutWrapper = "<div class='cl-imgcut-wrapper-div'></div>";
 var imgSrcTag = "<img class='cl-imgcut-image-div'/>";
 var ajaxUploadForm = "<form class='cl-imgcut-ajax-upload-form'></form>";
