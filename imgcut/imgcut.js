@@ -26,19 +26,37 @@ $.widget("custom.imgcut", {
 
         _this = this;
 
-        this.doScroll = true;
-        this.zoomFactor = 1;
-        this.maxZoomFactor = 5;
+        this._initializeOptions();
 
+        this._createWorkspace();
+        /*
+         this.element.before(this.wrap);
+
+         this._initializeDragAndDropDiv();
+
+         this._initializeToolbar();
+
+         this._updateCoordinates();
+
+         this._attachAjaxForm();
+         */
+        /*this.element.change(function () {
+
+         _this._uploadToServer();
+
+         });
+         */
+
+    },
+    _initializeWorkspace: function () {
         // first wrap image
-        this.wrap = $("<div/>").addClass("cl-imgcut-wrap");
-        this.element.before(this.wrap);
+        this.wrap = $(imgCutWrapper);
+        this.element.wrap(this.wrap);
+        this.wrap.append(imgSrcTag);
 
-        // create toolbar
-        this.toolbar = $(toolBarHtml);
 
-        this._initializeToolbar();
-
+    },
+    _initializeDragAndDropDiv: function () {
         // add drag and drop div
         this.dragAndDropDiv = $(dragAndDropDiv);
         this.dragAndDropDiv.scroll(function () {
@@ -87,20 +105,17 @@ $.widget("custom.imgcut", {
             }
         );
 
-        this.toolbar.appendTo(this.wrap);
-
-        this.element.change(function () {
-
-            _this._uploadToServer();
-
-        });
-
-        this._updateCoordinates();
-
-        this._attachAjaxForm();
+    },
+    _initializeOptions: function () {
+        this.doScroll = true;
+        this.zoomFactor = 1;
+        this.maxZoomFactor = 5;
 
     },
-    _initializeToolbar: function(){
+    _initializeToolbar: function () {
+
+        // create toolbar
+        this.toolbar = $(toolBarHtml);
 
         // attach events
         this.toolbar.find(".cl-imgcut-toolbar-button-crop").on("click", function () {
@@ -118,6 +133,8 @@ $.widget("custom.imgcut", {
         this.toolbar.find(".cl-imgcut-toolbar-button-save").on("click", function () {
             _this._saveButtonPressed();
         });
+        this.toolbar.appendTo(this.wrap);
+
     },
     _attachAjaxForm: function () {
 
@@ -301,4 +318,6 @@ var toolBarHtml = "<div class='cl-imgcut-toolbar'>" +
     "</div>" +
     "</div>";
 var dragAndDropDiv = "<div class='cl-imgcut-drag-and-drop-div'><img src=''/></div>"
+var imgCutWrapper = "<div class='cl-imgcut-wrapper-div'></div>";
+var imgSrcTag = "<img class='cl-imgcut-image-div'/>";
 var ajaxUploadForm = "<form class='cl-imgcut-ajax-upload-form'></form>";
