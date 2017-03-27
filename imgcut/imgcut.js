@@ -94,12 +94,16 @@ $.widget("custom.imgcut", {
                         var ctx = canvas.get(0).getContext("2d");
 
                         var image = new Image();
+                        image.src = event.target.result;
+
                         image.onload = function () {
-                            canvas.height = 300;
-                            canvas.width = 300;
-                            ctx.drawImage(image, 0, 0, 300, 300);
+                            // ctx.clearRect(0, 0, canvas.width, canvas.height);
+                            ctx.canvas.width = parseInt(image.width);
+                            ctx.canvas.height = parseInt(image.height);
+                            ctx.drawImage(image, 0, 0, image.width, image.height);
+
+                            $(_this.imageDropDiv).append(canvas);
                         };
-                        image.src = "http://placekitten.com/300/400";
 
                         //  _this._sendToServerAndGetJPG(event.target.result);
 
