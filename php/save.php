@@ -10,7 +10,7 @@ $location = $_FILES['myfile']['tmp_name'];
 $extension = $_FILES['myfile']['type'];
 
 $saveLoadedFileClass = new SaveLoadedFile("http://localhost/dev/imgcut/php", getcwd(), 'myfile', $extension);
-$saveLoadedFileClass->saveThisLoca  tion($location);
+$saveLoadedFileClass->saveThisLocation($location);
 
 echo $saveLoadedFileClass->getFileLocationOnServer();
 die();

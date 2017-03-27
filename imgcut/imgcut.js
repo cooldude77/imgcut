@@ -12,6 +12,7 @@ $.widget("custom.imgcut", {
         maxHeight: 400,
         maxWidth: 400,
         // ajax options
+        urlToConvert: "http://localhost/dev/imgcut/php/generate_url.php",
         urlToCrop: "http://localhost/dev/imgcut/php/crop.php",
         urlToSave: "http://localhost/dev/imgcut/php/save.php",
         // Resizer options
@@ -32,9 +33,10 @@ $.widget("custom.imgcut", {
 
         this._initializeImageDropDiv();
 
-        /*
-         this._initializeToolbar();
 
+        //this._initializeToolbar();
+
+        /*
          this._updateCoordinates();
 
          this._attachAjaxForm();
@@ -56,7 +58,7 @@ $.widget("custom.imgcut", {
         // add dragAnddrop div after control
         this.imageDropDiv = $(imageDropDiv);
         this.element.after(this.imageDropDiv);
-        //this.element.hide();
+        this.element.hide();
 
 
     },
@@ -73,15 +75,34 @@ $.widget("custom.imgcut", {
                 event.stopPropagation();
                 event.preventDefault();
 
+                console.log(event);
 
                 var file = event.originalEvent.dataTransfer.files[0];
                 if (file != undefined) {
                     var reader = new FileReader();
                     reader.onload = function (event) {
 
-                        var img = $("<img>").attr("src", event.target.result);
+                        // TODO : Check type
+                        // TODO : Check size
+                        // var image = new Image();
+                        // image.src = event.target.result;
 
-                        $(_this.imageDropDiv).append(img);
+                        var canvas = $("<canvas/>");
+
+                        $("body").append(canvas);
+
+                        var ctx = canvas.get(0).getContext("2d");
+
+                        var image = new Image();
+                        image.onload = function () {
+                            canvas.height = 300;
+                            canvas.width = 300;
+                            ctx.drawImage(image, 0, 0, 300, 300);
+                        };
+                        image.src = "http://placekitten.com/300/400";
+
+                        //  _this._sendToServerAndGetJPG(event.target.result);
+
                     };
 
                     reader.readAsDataURL(file);
@@ -165,7 +186,8 @@ $.widget("custom.imgcut", {
         this.toolbar.find(".cl-imgcut-toolbar-button-save").on("click", function () {
             _this._saveButtonPressed();
         });
-        this.toolbar.appendTo(this.wrap);
+
+        this.imageDropDiv.before(this.toolbar);
 
     },
     _attachAjaxForm: function () {
@@ -174,6 +196,19 @@ $.widget("custom.imgcut", {
         this.ajaxUploadForm.appendTo(this.wrap);
 
     },
+    _sendToServerAndGetJPG: function (dataUrl) {
+
+        $.post(
+            this.options.urlToConvert,
+            {dataUrl: dataUrl},
+            function (response) {
+
+                alert(response);
+            }
+        );
+
+    },
+
     _uploadToServer: function () {
 
         _this = this;
@@ -348,6 +383,7 @@ var toolBarHtml = "<div class='cl-imgcut-toolbar'>" +
     "<button name='button_zoom' class='cl-imgcut-toolbar-button-zoom-minus' >-</button>" +
     "<button name='button_save' class='cl-imgcut-toolbar-button-save' >Save</button>" +
     "</div>" +
+    "<canvas class='cl-canvas'></canvas>" +
     "</div>";
 var imageDropDiv = "<div class='cl-imgcut-drag-and-drop-div'></div>"
 var imgCutWrapper = "<div class='cl-imgcut-wrapper-div'></div>";
